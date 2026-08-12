@@ -1,0 +1,19 @@
+{
+    "name": "Generate VietQR",
+    "version": "1.0.0",
+    "description": "Tạo mã VietQR cho đơn hàng chuyển khoản ngân hàng, giúp khách hàng quét mã thanh toán trực tiếp.",
+    "author": "Jankx",
+    "extension_id": "generate-vietqr",
+    "context": ["frontend", "admin"],
+    "caller": {
+        "file": "GenerateVietqrExtension.php",
+        "class": "Jankx\\Extensions\\GenerateVietqr\\GenerateVietqrExtension",
+        "method": "init"
+    },
+    "requirements": {
+        "php": ">=7.4"
+    },
+    "dependencies": ["base-ecommerce"],
+    "auto_activate": true,
+    "settings_url": "admin.php?page=jankx-ecommerce-settings&tab=payment&gateway=bank_transfer"
+}
