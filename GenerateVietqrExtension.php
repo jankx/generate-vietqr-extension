@@ -64,7 +64,14 @@ class GenerateVietqrExtension extends AbstractExtension
     public function renderQrCode(string $content, $order): string
     {
         $gateway = $order->getPaymentMethod();
-        if ($gateway !== 'bank_transfer') {
+        if ($gateway === 'qrviet') {
+            // The qrviet gateway renders its own dynamic QR card (hooked at
+            // priority 20). Only provide the static VietQR fallback when that
+            // card cannot be shown (missing transaction or QR image).
+            if ($this->qrvietHasDynamicQr($order)) {
+                return $content;
+            }
+        } elseif ($gateway !== 'bank_transfer') {
             return $content;
         }
 
@@ -121,6 +128,23 @@ class GenerateVietqrExtension extends AbstractExtension
         $output .= '</div>';
 
         return $content . $output;
+    }
+
+    /**
+     * Whether the qrviet gateway can render its own dynamic QR card
+     * (mirrors the conditions in QrVietPaymentGatewayExtension::renderOrderDetailQr).
+     */
+    protected function qrvietHasDynamicQr($order): bool
+    {
+        $txnClass = 'Jankx\Extensions\PaymentSystem\Models\Transaction';
+        $transactionId = method_exists($order, 'getPaymentTransactionId') ? $order->getPaymentTransactionId() : 0;
+        if (!$transactionId || !class_exists($txnClass)) {
+            return false;
+        }
+
+        $transaction = new $txnClass((int) $transactionId);
+
+        return $transaction->getId() && $transaction->getMeta('_qr_image') !== '';
     }
 
     protected function getBankBin(string $bankName): string
