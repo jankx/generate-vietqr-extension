@@ -96,6 +96,9 @@ class GenerateVietqrExtension extends AbstractExtension
 
         $amount = (int) $order->getTotal();
         $orderNumber = $order->getOrderNumber();
+        $paymentContent = function_exists('Jankx\\Extensions\\Ecommerce\\jankx_payment_content')
+            ? \Jankx\Extensions\Ecommerce\jankx_payment_content($order)
+            : $orderNumber;
         $accountNameUpper = $this->removeDiacritics(mb_strtoupper($accountHolder, 'UTF-8'));
 
         $qrUrl = sprintf(
@@ -103,7 +106,7 @@ class GenerateVietqrExtension extends AbstractExtension
             $bankBin,
             $accountNumber,
             $amount,
-            rawurlencode($orderNumber),
+            rawurlencode($paymentContent),
             rawurlencode($accountNameUpper)
         );
 
@@ -114,14 +117,14 @@ class GenerateVietqrExtension extends AbstractExtension
         $output .= '</div>';
         $output .= '<div class="jankx-vietqr-content">';
         $output .= '<div class="jankx-vietqr-image">';
-        $output .= '<img src="' . esc_url($qrUrl) . '" alt="VietQR - ' . esc_attr($orderNumber) . '" width="280" height="280" loading="lazy">';
+        $output .= '<img src="' . esc_url($qrUrl) . '" alt="VietQR - ' . esc_attr($paymentContent) . '" width="280" height="280" loading="lazy">';
         $output .= '</div>';
         $output .= '<div class="jankx-vietqr-info">';
         $output .= '<p><strong>' . esc_html__('Ngân hàng:', 'jankx') . '</strong> ' . esc_html($bankName) . '</p>';
         $output .= '<p><strong>' . esc_html__('Số TK:', 'jankx') . '</strong> ' . esc_html($accountNumber) . '</p>';
         $output .= '<p><strong>' . esc_html__('Chủ TK:', 'jankx') . '</strong> ' . esc_html($accountHolder) . '</p>';
         $output .= '<p><strong>' . esc_html__('Số tiền:', 'jankx') . '</strong> <span class="jankx-vietqr-amount">' . esc_html(number_format($amount, 0, ',', '.')) . ' ₫</span></p>';
-        $output .= '<p><strong>' . esc_html__('Nội dung CK:', 'jankx') . '</strong> <code>' . esc_html($orderNumber) . '</code></p>';
+        $output .= '<p><strong>' . esc_html__('Nội dung CK:', 'jankx') . '</strong> <code>' . esc_html($paymentContent) . '</code></p>';
         $output .= '<p class="description">' . esc_html__('Mở ứng dụng ngân hàng → Quét mã QR → Xác nhận thanh toán.', 'jankx') . '</p>';
         $output .= '</div>';
         $output .= '</div>';
